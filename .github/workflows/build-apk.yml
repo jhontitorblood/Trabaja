@@ -66,7 +66,14 @@ jobs:
 
       - name: Compilar APK (firma estable de depuración)
         working-directory: android
-        run: gradle assembleDebug --no-daemon
+        run: |
+          # Maven Central a veces responde 429 (demasiadas solicitudes); se reintenta solo.
+          for i in 1 2 3; do
+            gradle assembleDebug --no-daemon && exit 0
+            echo "Intento $i fallido; reintentando en $((i * 20)) s..."
+            sleep $((i * 20))
+          done
+          exit 1
 
       - name: Compilar APK de producción (solo si hay clave en los secretos)
         if: env.HAS_KEYSTORE == 'true'
