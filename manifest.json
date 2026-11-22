@@ -1,9 +1,20 @@
 {
- "id":"./", "name":"Trabaja", "short_name":"SISTEMA", "description":"RPG de hábitos, entrenamiento y progresión personal.",
- "start_url":"./?source=pwa", "scope":"./", "display":"standalone", "display_override":["standalone","fullscreen","minimal-ui"], "orientation":"portrait",
- "background_color":"#070910", "theme_color":"#080b13", "categories":["health","lifestyle","games"],
- "icons":[
-  {"src":"assets/icon-sistema.png","sizes":"any","type":"image/png","purpose":"any"},
-  {"src":"assets/icon-sistema.png","sizes":"any","type":"image/png","purpose":"maskable"}
- ]
+  "id": "./",
+  "name": "Trabaja",
+  "short_name": "Trabaja",
+  "description": "RPG de hábitos, enfoque, entrenamiento y progresión personal.",
+  "lang": "es",
+  "start_url": "./?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#070910",
+  "theme_color": "#070910",
+  "categories": ["productivity", "health", "lifestyle"],
+  "icons": [
+    { "src": "assets/img/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/img/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
 }

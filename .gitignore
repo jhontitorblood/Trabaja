@@ -1,4 +1,9 @@
 android/app/build/
+android/build/
 android/.gradle/
 android/app/src/main/assets/www/
+dist/
 *.keystore
+!android/debug.keystore
+local.properties
+.DS_Store
