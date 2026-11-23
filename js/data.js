@@ -119,6 +119,8 @@ const BOSSES = [
   { name: 'Coloso del Agotamiento', icon: 'moon', desc: 'Se debilita cuando descansas bien y avanzas a tu ritmo.' }
 ];
 
+const BOSS_DESC = 'Un enemigo poderoso ha aparecido esta semana. Cada logro que consigas le hace daño.';
+
 const FOCUS_PRESETS = [15, 25, 45, 60];
 const BREAK_PRESETS = [5, 10];
 const FOCUS_XP_PER_MIN = 0.8;

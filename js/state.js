@@ -49,7 +49,7 @@ function initial() {
     shields: 0, boostUntil: 0, shieldNote: '',
     days: {},
     weekly: { id: '', quests: [], progress: {}, claimed: {} },
-    boss: { id: '', name: '', icon: 'skull', desc: '', max: 0, dealt: 0, claimed: false },
+    boss: { id: '', name: '', icon: 'skull', image: '', desc: '', max: 0, dealt: 0, claimed: false },
     focus: { sessions: 0, minutes: 0, active: null, xpDay: { day: '', xp: 0 }, lastDone: null }
   };
 }
@@ -162,9 +162,20 @@ function checkStreakBreak(d) {
 
 /* ---------- semana: retos y jefe ---------- */
 function questName(q) { return q.name.replace('{n}', q.target); }
+/* Jefe con imagen propia: se elige una al azar por semana (misma semana = misma imagen). */
+function applyBossImage(w) {
+  if (!BOSS_IMAGES.length) { state.boss.image = ''; return; }
+  const p = BOSS_IMAGES[Math.floor(rng(hashStr('bossimg' + w))() * BOSS_IMAGES.length)];
+  state.boss.image = p.image; state.boss.name = p.name; state.boss.desc = BOSS_DESC;
+}
 function ensureWeek() {
   const w = weekId(new Date());
-  if (state.weekly.id === w && state.boss.id === w) return;
+  if (state.weekly.id === w && state.boss.id === w) {
+    // si se añadieron o quitaron imágenes a mitad de semana, se actualiza sin perder el daño hecho
+    const cur = state.boss.image || '';
+    if ((!cur && BOSS_IMAGES.length) || (cur && !BOSS_IMAGES.some(x => x.image === cur))) { applyBossImage(w); save(); }
+    return;
+  }
   const r = rng(hashStr('week' + w));
   const quests = shuffle(WEEKLY_POOL, r).slice(0, 3).map(p => ({
     id: p.id, stat: p.stat, icon: p.icon, name: p.name, xp: p.xp, coins: p.coins,
@@ -172,7 +183,8 @@ function ensureWeek() {
   }));
   state.weekly = { id: w, quests, progress: {}, claimed: {} };
   const b = BOSSES[Math.floor(r() * BOSSES.length)];
-  state.boss = { id: w, name: b.name, icon: b.icon, desc: b.desc, max: Math.round((350 + state.level * 30) / 10) * 10, dealt: 0, claimed: false };
+  state.boss = { id: w, name: b.name, icon: b.icon, desc: b.desc, max: Math.round((350 + state.level * 30) / 10) * 10, dealt: 0, claimed: false, image: '' };
+  applyBossImage(w);
   save();
 }
 function weekDays() { const m = mondayOf(new Date()); return Array.from({ length: 7 }, (_, i) => { const d = new Date(m); d.setDate(m.getDate() + i); return dayKey(d); }); }

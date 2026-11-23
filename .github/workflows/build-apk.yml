@@ -31,6 +31,8 @@ jobs:
         run: |
           set -euo pipefail
           for f in js/*.js; do node --check "$f"; done
+          python3 tools/gen-bosses.py
+          node --check js/bosses.js
           python3 tools/gen-sw.py
           node --check sw.js
 

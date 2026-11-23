@@ -1,0 +1,9 @@
+Pon aquí las imágenes de tus jefes semanales (png, jpg, jpeg, webp o gif).
+
+- Cada semana la app elige una al azar.
+- El nombre del archivo es el nombre del jefe. Ejemplo:
+    "Hidra del Desorden.png"  ->  jefe "Hidra del Desorden"
+    "01-gólem_de_hielo.webp"  ->  jefe "Gólem de hielo"
+- Mejor cuadradas o verticales, de unos 600 px y menos de 500 KB cada una.
+- Al subir el archivo a GitHub, el flujo "Build Android APK" las detecta solo
+  (no hay que editar código). Si no hay ninguna imagen, se usa el ícono de siempre.

@@ -46,6 +46,10 @@ En **Settings → Secrets and variables → Actions** crea: `ANDROID_KEYSTORE_BA
 
 En la app vieja: Ajustes → Exportar. En Trabaja: Ajustes → Importar. El respaldo se convierte solo al formato nuevo.
 
+## Imágenes de tus jefes semanales
+
+Sube tus imágenes (png, jpg, webp o gif) a `assets/img/bosses/`. Cada semana la app elige una al azar y el **nombre del archivo es el nombre del jefe** (`Hidra del Desorden.png` → «Hidra del Desorden»). Si la carpeta está vacía se usa el ícono de siempre. Al subirlas, el flujo de GitHub las detecta solo; si pruebas en local ejecuta `python3 tools/gen-bosses.py`.
+
 ## Estructura
 
 ```
@@ -53,7 +57,7 @@ index.html  style.css  manifest.json  sw.js
 js/       data · icons · state · fx · native · engine · views · ui · main
 assets/   fonts · img · audio
 android/  proyecto Gradle (WebView + recordatorios)
-tools/    gen-sw.py (versión de caché del modo web)
+tools/    gen-sw.py (caché del modo web) · gen-bosses.py (imágenes de jefes)
 ```
 
 Para probar en el navegador sirve la carpeta con cualquier servidor estático (`python3 -m http.server`) y abre `index.html`.

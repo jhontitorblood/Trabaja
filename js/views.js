@@ -109,7 +109,7 @@ function viewHome() {
 function bossCard(compact) {
   const b = state.boss; if (!b.max) return '';
   const p = pct(b.dealt, b.max), dead = b.dealt >= b.max;
-  return '<div class="panel boss ' + (dead ? 'dead' : '') + '" data-key="boss"><div class="boss-ico">' + ic(b.icon, 30) + '</div><div class="boss-body"><div class="row"><b>' + esc(b.name) + '</b><span class="pill">' + fmt(b.dealt) + ' / ' + fmt(b.max) + '</span></div>' +
+  return '<div class="panel boss ' + (dead ? 'dead' : '') + (b.image ? ' has-art' : '') + '" data-key="boss">' + (b.image ? '<img class="boss-art" src="' + esc(b.image) + '" alt="' + esc(b.name) + '" decoding="async">' : '<div class="boss-ico">' + ic(b.icon, 30) + '</div>') + '<div class="boss-body"><div class="row"><b>' + esc(b.name) + '</b><span class="pill">' + fmt(b.dealt) + ' / ' + fmt(b.max) + '</span></div>' +
     '<small class="muted">' + esc(b.desc) + '</small><div class="xp-track boss-bar"><div class="xp-fill" style="width:' + p + '%"></div></div>' +
     '<small class="muted">Cada XP que ganas le hace daño. Derrótalo para ganar +120 XP y +150 monedas.</small>' +
     (dead ? (b.claimed ? '<div class="pill ok mt">BOTÍN RECLAMADO</div>' : '<button class="btn gold full mt" data-act="claimBoss">' + ic('gift', 16) + ' Reclamar botín</button>') : '') + '</div></div>';

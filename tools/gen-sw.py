@@ -12,7 +12,7 @@ js = sorted((root / 'js').glob('*.js'))
 core = ['./', './index.html', './style.css', './manifest.json']
 core += ['./js/' + p.name for p in js]
 core += ['./' + p.relative_to(root).as_posix() for p in sorted((root / 'assets/fonts').glob('*'))]
-core += ['./' + p.relative_to(root).as_posix() for p in sorted((root / 'assets/img').rglob('*')) if p.is_file()]
+core += ['./' + p.relative_to(root).as_posix() for p in sorted((root / 'assets/img').rglob('*')) if p.is_file() and 'bosses' not in p.parts]
 
 h = hashlib.sha1()
 for f in ['index.html', 'style.css', 'manifest.json'] + ['js/' + p.name for p in js]:
