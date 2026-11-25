@@ -1,0 +1,2 @@
+vida: 1200
+descripcion: Tu propia voz dudando de ti. Cada logro, por pequeño que sea, le quita fuerza.

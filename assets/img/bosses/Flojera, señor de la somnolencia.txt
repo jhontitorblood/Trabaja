@@ -1,0 +1,2 @@
+vida: 700
+descripcion: Te arropa con «cinco minutitos más». Una acción pequeña lo hace retroceder.

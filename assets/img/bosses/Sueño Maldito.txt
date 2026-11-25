@@ -1,0 +1,2 @@
+vida: 900
+descripcion: Te atrapa en un letargo sin fin. Se debilita cuando descansas bien y cumples tus rutinas.

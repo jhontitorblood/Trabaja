@@ -1,0 +1,2 @@
+vida: 800
+descripcion: Se alimenta de tus preocupaciones; respira y avanza paso a paso para debilitarlo.

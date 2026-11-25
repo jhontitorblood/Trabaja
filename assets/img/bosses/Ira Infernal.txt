@@ -1,0 +1,2 @@
+vida: 1300
+descripcion: Arde con cada impulso y cada mal momento. La calma constante es lo único que lo apaga.

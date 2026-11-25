@@ -1,0 +1,2 @@
+vida: 1000
+descripcion: Susurra «mañana» y se alimenta de tu tiempo. Cae con pequeños golpes de hoy.
