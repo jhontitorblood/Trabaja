@@ -208,6 +208,7 @@ function bossPool() {
 /* Orden aleatorio sin repetir: cada ronda recorre todos los jefes una vez. */
 function bossForCycle(n, pool) {
   const len = pool.length, round = Math.floor(n / len), pos = ((n % len) + len) % len;
+  if (len <= 2) return pool[pos];     // con 1 o 2 jefes simplemente se alternan
   const order = r => shuffle(pool, rng(hashStr('bossround' + r)));
   const o = order(round);
   if (len > 1 && order(round - 1)[len - 1].key === o[0].key) { const t = o[0]; o[0] = o[1]; o[1] = t; }
