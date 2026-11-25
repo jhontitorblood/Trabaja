@@ -22,20 +22,20 @@ const PRIORITIES = {
 /* Banco de misiones: cada día se eligen 3 fijas + 3 al azar (misma semilla por fecha). */
 const CORE_MISSIONS = ['exercise', 'water', 'focus'];
 const MISSION_POOL = [
-  { id: 'exercise', name: 'Actividad física', desc: 'Rutina sugerida o 20 minutos de movimiento.', icon: 'dumbbell', xp: 20, type: 'Salud', stat: 'fuerza' },
-  { id: 'water', name: 'Hidratación', desc: 'Bebe agua a lo largo del día.', icon: 'droplet', xp: 10, type: 'Salud', stat: 'vitalidad' },
-  { id: 'focus', name: 'Enfoque', desc: 'Completa una tarea sin distracciones.', icon: 'target', xp: 25, type: 'Trabajo', stat: 'inteligencia' },
-  { id: 'reading', name: 'Lectura', desc: 'Lee 15 páginas o estudia 20 minutos.', icon: 'book', xp: 20, type: 'Estudio', stat: 'inteligencia' },
-  { id: 'order', name: 'Ordena tu espacio', desc: 'Dedica 10 minutos a ordenar.', icon: 'broom', xp: 15, type: 'Disciplina', stat: 'percepcion' },
-  { id: 'sleep', name: 'Descanso', desc: 'Prepara una hora de descanso saludable.', icon: 'moon', xp: 20, type: 'Salud', stat: 'vitalidad' },
-  { id: 'plan', name: 'Planifica tu día', desc: 'Escribe tus 3 prioridades de hoy.', icon: 'calendar', xp: 15, type: 'Trabajo', stat: 'inteligencia' },
-  { id: 'walk', name: 'Caminata', desc: 'Camina 20 minutos al aire libre.', icon: 'run', xp: 20, type: 'Salud', stat: 'agilidad' },
-  { id: 'stretch', name: 'Estiramientos', desc: 'Movilidad suave durante 10 minutos.', icon: 'leaf', xp: 10, type: 'Salud', stat: 'agilidad' },
+  { id: 'exercise', name: 'elige una rutina de ejercicio', desc: 'Rutina sugerida o 20 minutos de movimiento.', icon: 'dumbbell', xp: 25, type: 'Salud', stat: 'fuerza' },
+  { id: 'water', name: 'Hidratación', desc: 'Bebe agua al despertarte.', icon: 'droplet', xp: 10, type: 'Salud', stat: 'vitalidad' },
+  { id: 'order', name: 'Ordena tu espacio', desc: 'Dedica 60 minutos a ordenar.', icon: 'broom', xp: 25, type: 'Disciplina', stat: 'percepcion' },
+  { id: 'reading', name: 'Lectura', desc: 'Lee 5 páginas o estudia 20 minutos.', icon: 'book', xp: 20, type: 'Estudio', stat: 'inteligencia' },
+  { id: 'order', name: 'Ordena tu espacio', desc: 'Dedica 60 minutos a ordenar.', icon: 'broom', xp: 25, type: 'Disciplina', stat: 'percepcion' },
+  { id: 'sleep', name: 'Descanso', desc: 'Prepara 15 minutos de descanso saludable.', icon: 'moon', xp: 20, type: 'Salud', stat: 'vitalidad' },
+  { id: 'plan', name: 'Planifica tu día', desc: 'Agrega tus 3 misiones importantes de hoy.', icon: 'calendar', xp: 15, type: 'Trabajo', stat: 'inteligencia' },
+  { id: 'walk', name: 'Caminata', desc: 'Camina 20 minutos fuera de casa.', icon: 'run', xp: 25, type: 'Salud', stat: 'agilidad' },
+  { id: 'stretch', name: 'Estiramientos', desc: 'Movilidad suave durante 5 minutos.', icon: 'leaf', xp: 15, type: 'Salud', stat: 'agilidad' },
   { id: 'inbox', name: 'Bandeja limpia', desc: 'Responde o archiva pendientes.', icon: 'inbox', xp: 15, type: 'Trabajo', stat: 'percepcion' },
   { id: 'learn', name: 'Aprende algo nuevo', desc: 'Un video, artículo o práctica breve.', icon: 'sparkle', xp: 20, type: 'Estudio', stat: 'inteligencia' },
-  { id: 'breathe', name: 'Respira y agradece', desc: '5 minutos de calma y 3 cosas buenas.', icon: 'heart', xp: 10, type: 'Disciplina', stat: 'percepcion' },
-  { id: 'food', name: 'Cuida tu comida', desc: 'Una comida sencilla y sin prisa.', icon: 'leaf', xp: 15, type: 'Salud', stat: 'vitalidad' },
-  { id: 'goals', name: 'Revisa tus metas', desc: 'Mira tu progreso y ajusta el rumbo.', icon: 'flag', xp: 15, type: 'Disciplina', stat: 'inteligencia' }
+  { id: 'breathe', name: 'Respira y agradece', desc: '5 minutos de calma o una cancion que te guste.', icon: 'heart', xp: 10, type: 'Disciplina', stat: 'percepcion' },
+  { id: 'food', name: 'Un bocadillo', desc: 'Come algo que te anime o relaje un poco.', icon: 'leaf', xp: 15, type: 'Salud', stat: 'vitalidad' },
+  { id: 'goals', name: 'Revisa tus metas', desc: 'Anota y revisa tu progreso en tus metas.', icon: 'flag', xp: 15, type: 'Disciplina', stat: 'inteligencia' }
 ];
 
 const RECUR = [
