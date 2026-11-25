@@ -39,9 +39,13 @@ const MISSION_POOL = [
 ];
 
 const RECUR = [
-  { id: 'water-repeat', name: 'Bebe un vaso de agua', desc: 'Pausa de hidratación, sin forzar cantidades.', icon: 'droplet', xp: 4, interval: 120, max: 5, setting: 'waterInterval' },
-  { id: 'stretch-repeat', name: 'Pausa activa', desc: 'Camina un poco y estira suavemente.', icon: 'leaf', xp: 5, interval: 180, max: 4, setting: 'stretchInterval' }
+  { id: 'water-repeat', name: 'Bebe un vaso de agua', desc: 'Pausa de hidratación, sin forzar cantidades.', icon: 'droplet', xp: 4, hours: 2, on: 'waterOn', every: 'waterEvery' },
+  { id: 'stretch-repeat', name: 'Pausa activa', desc: 'Camina un poco y estira suavemente.', icon: 'leaf', xp: 5, hours: 3, on: 'stretchOn', every: 'stretchEvery' }
 ];
+const RECUR_HOURS = [1, 2, 3, 4, 5, 6];
+const RECUR_FROM = 8, RECUR_TO = 21;      // franja horaria de los avisos (8:00–21:59)
+const DAY_LABELS = [['1', 'L'], ['2', 'M'], ['3', 'X'], ['4', 'J'], ['5', 'V'], ['6', 'S'], ['0', 'D']];
+const BOSS_EPOCH = new Date(2024, 0, 5, 12);  // un viernes: origen para contar los ciclos de jefe
 
 const ROUTINES = {
   A: [
@@ -112,14 +116,13 @@ const WEEKLY_POOL = [
   { id: 'water', name: 'Bebe agua {n} veces', stat: 'water', targets: [12, 16], xp: 80, coins: 20, icon: 'droplet' }
 ];
 const BOSSES = [
-  { name: 'Sombra de la Procrastinación', icon: 'skull', desc: 'Susurra «mañana» y se alimenta de tu tiempo.' },
-  { name: 'Gólem de la Pereza', icon: 'castle', desc: 'Pesa una tonelada, pero cae con pequeños golpes constantes.' },
-  { name: 'Hidra del Desorden', icon: 'flame', desc: 'Por cada tarea pendiente le crece otra cabeza.' },
-  { name: 'Espectro de la Distracción', icon: 'eye', desc: 'Te llama desde el teléfono justo cuando empiezas.' },
-  { name: 'Coloso del Agotamiento', icon: 'moon', desc: 'Se debilita cuando descansas bien y avanzas a tu ritmo.' }
+  { name: 'Sombra de la Procrastinación', icon: 'skull', hp: 600, xp: 120, coins: 150, desc: 'Susurra «mañana» y se alimenta de tu tiempo.' },
+  { name: 'Gólem de la Pereza', icon: 'castle', hp: 900, xp: 180, coins: 225, desc: 'Pesa una tonelada, pero cae con pequeños golpes constantes.' },
+  { name: 'Hidra del Desorden', icon: 'flame', hp: 1200, xp: 240, coins: 300, desc: 'Por cada tarea pendiente le crece otra cabeza.' },
+  { name: 'Espectro de la Distracción', icon: 'eye', hp: 750, xp: 150, coins: 190, desc: 'Te llama desde el teléfono justo cuando empiezas.' },
+  { name: 'Coloso del Agotamiento', icon: 'moon', hp: 1500, xp: 300, coins: 375, desc: 'Se debilita cuando descansas bien y avanzas a tu ritmo.' }
 ];
 
-const BOSS_DESC = 'Un enemigo poderoso ha aparecido esta semana. Cada logro que consigas le hace daño.';
 
 const FOCUS_PRESETS = [15, 25, 45, 60];
 const BREAK_PRESETS = [5, 10];

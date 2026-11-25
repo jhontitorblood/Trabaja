@@ -46,9 +46,27 @@ En **Settings → Secrets and variables → Actions** crea: `ANDROID_KEYSTORE_BA
 
 En la app vieja: Ajustes → Exportar. En Trabaja: Ajustes → Importar. El respaldo se convierte solo al formato nuevo.
 
-## Imágenes de tus jefes semanales
+## Jefes semanales
 
-Sube tus imágenes (png, jpg, webp o gif) a `assets/img/bosses/`. Cada semana la app elige una al azar y el **nombre del archivo es el nombre del jefe** (`Hidra del Desorden.png` → «Hidra del Desorden»). Si la carpeta está vacía se usa el ícono de siempre. Al subirlas, el flujo de GitHub las detecta solo; si pruebas en local ejecuta `python3 tools/gen-bosses.py`.
+- El jefe cambia **cada viernes a las 00:00**, lo derrotes o no, y la tarjeta muestra una cuenta atrás.
+- Cada jefe tiene su propia vida, descripción y botín. Si no lo derrotas, el siguiente aparece sin entregar recompensa.
+- Los jefes derrotados se guardan y se pueden usar como ícono de perfil en **Tienda → Jefes**.
+
+Para usar tus propias imágenes, súbelas a `assets/img/bosses/` (el nombre del archivo es el nombre del jefe). Para fijar vida, descripción o botín crea un `.txt` con el mismo nombre:
+
+```
+vida: 800
+descripcion: Por cada tarea pendiente le crece otra cabeza.
+xp: 160
+monedas: 200
+```
+
+El flujo de GitHub las detecta solo; en local ejecuta `python3 tools/gen-bosses.py`. Más detalle en `assets/img/bosses/LEEME.txt`.
+
+## Misiones programadas y rutinas
+
+- Al crear una misión puedes **programarla**: eliges los días (L M X J V S D) y la hora, y solo aparece esos días desde esa hora. Se editan desde la sección *Programadas* en Misiones.
+- Agua y pausa activa tienen un interruptor y un selector «cada 1–6 horas» (avisos de 8:00 a 21:59), sin tope diario: dan XP una vez por intervalo.
 
 ## Estructura
 

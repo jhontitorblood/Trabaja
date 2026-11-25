@@ -54,6 +54,7 @@ const NAV = [
   { v: 'character', label: 'Cazador', icon: 'user' }
 ];
 function buildChrome() {
+  buildDayChips('mDayChips'); buildDayChips('rDayChips');
   document.getElementById('topbar').innerHTML =
     '<button class="brand" data-act="nav" data-v="home"><img class="brand-mark" src="assets/img/icon-192.png" alt=""><span><b>TRABAJA</b><small>PROTOCOLO DE DESPERTAR</small></span></button>' +
     '<div class="top-actions"><button class="coin-chip" data-act="nav" data-v="shop" aria-label="Tienda">' + ic('coin', 18) + '<b id="coinCount">0</b></button>' +
@@ -61,6 +62,15 @@ function buildChrome() {
   document.getElementById('nav').innerHTML = '<span class="nav-ind" aria-hidden="true"></span>' +
     NAV.map(n => '<button class="nav-item" data-act="nav" data-v="' + n.v + '" aria-label="' + n.label + '">' + ic(n.icon, 22) + '<small>' + n.label + '</small></button>').join('');
 }
+/* selector de días (L M X J V S D) */
+function buildDayChips(id) {
+  const el = document.getElementById(id); if (!el) return;
+  el.innerHTML = DAY_LABELS.map(d => '<label class="dchip"><input type="checkbox" value="' + d[0] + '"><span>' + d[1] + '</span></label>').join('');
+}
+function setDayChips(id, days) { document.querySelectorAll('#' + id + ' input').forEach(i => { i.checked = days.includes(Number(i.value)); }); }
+function getDayChips(id) { return Array.from(document.querySelectorAll('#' + id + ' input:checked')).map(i => Number(i.value)); }
+const DAY_PRESETS = { all: [0, 1, 2, 3, 4, 5, 6], weekdays: [1, 2, 3, 4, 5], weekend: [0, 6] };
+
 function renderChrome() {
   const idx = NAV.findIndex(n => n.v === view);
   const nav = document.getElementById('nav');
@@ -114,16 +124,18 @@ function openMissionDialog(id) {
   document.getElementById('mType').value = m ? m.type : 'Personal';
   document.getElementById('mPriority').value = m ? m.priority : 'media';
   document.getElementById('mSubs').value = m ? (m.subtasks || []).map(s => s.t).join('\n') : '';
+  document.getElementById('mScheduled').checked = !!(m && m.schedule);
   document.getElementById('mReminder').checked = !!(m && m.reminderEnabled);
-  document.getElementById('mTime').value = (m && m.reminderTime) || '18:00';
-  const d = (m && m.reminderDays) || [0, 1, 2, 3, 4, 5, 6];
-  document.getElementById('mDays').value = d.length === 5 ? 'weekdays' : d.length === 2 ? 'weekend' : 'all';
+  document.getElementById('mTime').value = (m && ((m.schedule && m.schedule.time) || m.reminderTime)) || '18:00';
+  setDayChips('mDayChips', (m && ((m.schedule && m.schedule.days) || m.reminderDays)) || DAY_PRESETS.all);
   openDialog('missionDialog');
 }
 function submitMission(ev) {
   ev.preventDefault();
   const g = id => document.getElementById(id);
-  const ok = saveMission({ name: g('mName').value, desc: g('mDesc').value, xp: g('mXP').value, type: g('mType').value, priority: g('mPriority').value, subs: g('mSubs').value, reminder: g('mReminder').checked, time: g('mTime').value, days: g('mDays').value }, editingMission);
+  const days = getDayChips('mDayChips');
+  if ((g('mScheduled').checked || g('mReminder').checked) && !days.length) { toast('Elige al menos un día'); return; }
+  const ok = saveMission({ name: g('mName').value, desc: g('mDesc').value, xp: g('mXP').value, type: g('mType').value, priority: g('mPriority').value, subs: g('mSubs').value, scheduled: g('mScheduled').checked, reminder: g('mReminder').checked, time: g('mTime').value, days }, editingMission);
   if (ok) { closeDialog('missionDialog'); sound('select'); }
 }
 
@@ -134,15 +146,14 @@ function openReminderDialog(id) {
   document.getElementById('rTitle').textContent = m.name;
   document.getElementById('rEnabled').checked = !!m.reminderEnabled || !m.reminderTime;
   document.getElementById('rTime').value = m.reminderTime || '18:00';
-  const d = m.reminderDays || [0, 1, 2, 3, 4, 5, 6];
-  document.getElementById('rDays').value = d.length === 5 ? 'weekdays' : d.length === 2 ? 'weekend' : 'all';
+  setDayChips('rDayChips', m.reminderDays || DAY_PRESETS.all);
   document.getElementById('rNote').textContent = state.settings.notifications ? '' : 'Activa las notificaciones en Ajustes para recibir el aviso.';
   openDialog('reminderDialog');
 }
 function submitReminder(ev) {
   ev.preventDefault();
-  const dv = document.getElementById('rDays').value;
-  const days = dv === 'weekdays' ? [1, 2, 3, 4, 5] : dv === 'weekend' ? [0, 6] : [0, 1, 2, 3, 4, 5, 6];
+  const days = getDayChips('rDayChips');
+  if (!days.length) { toast('Elige al menos un día'); return; }
   const time = document.getElementById('rTime').value || '18:00';
   setMissionReminder(reminderFor, document.getElementById('rEnabled').checked, time, days);
   closeDialog('reminderDialog');

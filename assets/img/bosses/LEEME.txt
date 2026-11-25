@@ -1,9 +1,28 @@
-Pon aquí las imágenes de tus jefes semanales (png, jpg, jpeg, webp o gif).
+Pon aquí las imágenes de tus jefes (png, jpg, jpeg, webp o gif).
 
-- Cada semana la app elige una al azar.
-- El nombre del archivo es el nombre del jefe. Ejemplo:
+CADA IMAGEN ES UN JEFE
+- El nombre del archivo es el nombre del jefe:
     "Hidra del Desorden.png"  ->  jefe "Hidra del Desorden"
     "01-gólem_de_hielo.webp"  ->  jefe "Gólem de hielo"
+- El jefe cambia cada VIERNES a las 00:00. Van saliendo todos, uno por semana,
+  en orden aleatorio y sin repetirse hasta haber pasado todos.
+- Si lo derrotas antes de que escape, recibes su botín y su ícono para usarlo
+  como foto de perfil (Tienda > Jefes). Si no, aparece el siguiente sin botín.
+
+VIDA, DESCRIPCIÓN Y RECOMPENSA PROPIAS (opcional)
+Crea un archivo de texto con el MISMO nombre que la imagen:
+    Hidra del Desorden.png
+    Hidra del Desorden.txt
+y dentro escribe, una por línea (todas son opcionales):
+    vida: 800
+    descripcion: Por cada tarea pendiente le crece otra cabeza.
+    xp: 160
+    monedas: 200
+Lo que no escribas se rellena solo: cada jefe recibe una vida y una descripción
+distintas, y el botín crece con su vida.
+
+CONSEJOS
 - Mejor cuadradas o verticales, de unos 600 px y menos de 500 KB cada una.
-- Al subir el archivo a GitHub, el flujo "Build Android APK" las detecta solo
-  (no hay que editar código). Si no hay ninguna imagen, se usa el ícono de siempre.
+- Al subir los archivos a GitHub, el flujo "Build Android APK" los detecta solo
+  (no hay que editar código).
+- Sin imágenes en esta carpeta se usan los 5 jefes con ícono incluidos.

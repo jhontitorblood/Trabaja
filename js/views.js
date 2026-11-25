@@ -14,7 +14,10 @@ function ring(p, size, stroke, inner, cls) {
 function avatar(size) {
   const f = FRAMES.find(x => x.id === state.frame);
   const style = f && f.color ? ' style="--frame:' + f.color + '"' : '';
-  return '<div class="profile-avatar ' + size + (f && f.color ? ' framed' : '') + '"' + style + '>' + (state.profilePhoto ? '<img src="' + state.profilePhoto + '" alt="Foto de ' + esc(state.name) + '">' : ic('user', size === 'large' ? 44 : 24)) + '</div>';
+  const bd = state.avatar && state.defeated.find(d => d.key === state.avatar), px = size === 'large' ? 44 : 24;
+  const inner = bd ? (bd.image ? '<img src="' + esc(bd.image) + '" alt="' + esc(bd.name) + '">' : ic(bd.icon, px))
+    : state.profilePhoto ? '<img src="' + state.profilePhoto + '" alt="Foto de ' + esc(state.name) + '">' : ic('user', px);
+  return '<div class="profile-avatar ' + size + (f && f.color ? ' framed' : '') + (bd && bd.image ? ' boss-av' : '') + '"' + style + '>' + inner + '</div>';
 }
 function xpBar() {
   const need = xpNext(), p = pct(state.xp, need);
@@ -39,10 +42,10 @@ function missionCard(m) {
     '<div class="row"><div class="mission-title">' + esc(m.name) + '</div>' + (m.completed ? '<span class="pill ok">HECHA</span>' : '') + '</div>' +
     '<div class="mission-desc">' + esc(m.desc || 'Orden activa.') + '</div>' +
     '<div class="mission-meta"><span class="pill xp">+' + m.xp + ' XP</span><span class="pill">' + esc(m.type || 'Personal') + '</span><span class="pill pr">' + pr.label + '</span>' +
-    (subTot ? '<span class="pill">' + subDone + '/' + subTot + ' pasos</span>' : '') + (m.reminderEnabled ? '<span class="pill">' + ic('bell', 11) + ' ' + esc(m.reminderTime || '') + '</span>' : '') + '</div>' +
+    (subTot ? '<span class="pill">' + subDone + '/' + subTot + ' pasos</span>' : '') + (m.schedule ? '<span class="pill">' + ic('calendar', 11) + ' ' + esc(m.schedule.time) + '</span>' : '') + (m.reminderEnabled ? '<span class="pill">' + ic('bell', 11) + ' ' + esc(m.reminderTime || '') + '</span>' : '') + '</div>' +
     subList(m) +
     '<div class="mission-actions">' + (m.completed ? '<button class="btn success" disabled>' + ic('check', 14) + ' Completada</button>' : '<button class="btn primary" data-act="complete" data-id="' + esc(m.id) + '">Completar</button><button class="btn" data-act="focusFor" data-id="' + esc(m.id) + '" aria-label="Enfocar">' + ic('timer', 15) + '</button>') +
-    (!m.completed ? '<button class="btn ghost" data-act="remind" data-id="' + esc(m.id) + '" aria-label="Aviso">' + ic('bell', 15) + '</button>' : '') +
+    (!m.completed && !m.schedule ? '<button class="btn ghost" data-act="remind" data-id="' + esc(m.id) + '" aria-label="Aviso">' + ic('bell', 15) + '</button>' : '') +
     (m.custom && !m.completed ? '<button class="btn ghost" data-act="editMission" data-id="' + esc(m.id) + '" aria-label="Editar">' + ic('edit', 15) + '</button><button class="btn ghost danger-t" data-act="delMission" data-id="' + esc(m.id) + '" aria-label="Eliminar">' + ic('trash', 15) + '</button>' : '') +
     '</div></div></article>';
 }
@@ -51,9 +54,19 @@ function sortedMissions(list) {
 }
 function recurrentCards() {
   return RECUR.map(r => {
-    const n = state.recurrent.counts[r.id] || 0, iv = state.settings[r.setting] || r.interval;
-    return '<div class="recurrent-card" data-key="r-' + r.id + '"><span class="rc-icon">' + ic(r.icon, 22) + '</span><div class="rc-body"><b>' + r.name + '</b><small>' + r.desc + ' · ' + iv + ' min</small></div><span class="count">' + n + '/' + r.max + '</span><button class="btn success" data-act="recurrent" data-id="' + r.id + '" ' + (n >= r.max ? 'disabled' : '') + '>+' + r.xp + ' XP</button></div>';
+    const left = recurLeft(r), n = state.recurrent.counts[r.id] || 0, ready = left <= 0;
+    return '<div class="recurrent-card" data-key="r-' + r.id + '"><span class="rc-icon">' + ic(r.icon, 22) + '</span><div class="rc-body"><b>' + r.name + '</b><small>' + r.desc + (n ? ' · hoy ' + n : '') + '</small></div>' +
+      '<button class="btn ' + (ready ? 'success' : '') + '" data-act="recurrent" data-id="' + r.id + '" ' + (ready ? '' : 'disabled') + '>' + (ready ? '+' + r.xp + ' XP' : fmtLeft(left)) + '</button>' +
+      '<div class="rc-cfg"><span class="rc-cfg-l">' + ic('bell', 14) + ' Recordarme</span><label class="switch"><input type="checkbox" data-setting="' + r.on + '" ' + (state.settings[r.on] ? 'checked' : '') + '><i></i></label>' +
+      '<select data-setting="' + r.every + '" aria-label="Cada cuántas horas">' + RECUR_HOURS.map(h => '<option value="' + h + '" ' + (state.settings[r.every] === h ? 'selected' : '') + '>Cada ' + h + (h === 1 ? ' hora' : ' horas') + '</option>').join('') + '</select></div></div>';
   }).join('');
+}
+function scheduledList() {
+  const list = state.customMissions.filter(m => m.schedule);
+  if (!list.length) return '';
+  return sectionHead('PROGRAMADAS', '<small class="muted">Aparecen solas</small>') + '<div class="mission-list tight">' + list.map(m =>
+    '<div class="panel sched-row" data-key="sc-' + esc(m.id) + '"><div class="mission-ico">' + ic('calendar', 20) + '</div><div class="mission-body"><b>' + esc(m.name) + '</b><small class="muted">' + daysText(m.schedule.days) + ' · ' + esc(m.schedule.time) + (m.reminderEnabled ? ' · con aviso' : '') + '</small></div>' +
+    '<button class="btn ghost" data-act="editMission" data-id="' + esc(m.id) + '" aria-label="Editar">' + ic('edit', 15) + '</button><button class="btn ghost danger-t" data-act="delMission" data-id="' + esc(m.id) + '" aria-label="Eliminar">' + ic('trash', 15) + '</button></div>').join('') + '</div>';
 }
 
 /* ---------- semana (calendario + racha) ---------- */
@@ -83,8 +96,8 @@ function streakCard() {
 function viewHome() {
   const featured = WARRIORS.find(w => w.id === state.featured) || WARRIORS.find(w => state.achievements.includes(w.id));
   const need = xpNext();
-  const done = state.missions.filter(m => m.completed).length, total = state.missions.length;
-  const pending = sortedMissions(state.missions.filter(m => !m.completed)).slice(0, 3);
+  const act = activeMissions(), done = act.filter(m => m.completed).length, total = act.length;
+  const pending = sortedMissions(act.filter(m => !m.completed)).slice(0, 3);
   const hello = (() => { const h = new Date().getHours(); return h < 6 ? 'Buenas noches' : h < 12 ? 'Buenos días' : h < 19 ? 'Buenas tardes' : 'Buenas noches'; })();
   const art = featured ? '<img class="hero-art" src="' + esc(featured.image) + '" alt="' + esc(featured.name) + '" decoding="async">' : '<div class="hero-art empty-art">' + ic('sparkle', 64) + '</div>';
   return '<section class="view">' +
@@ -97,21 +110,27 @@ function viewHome() {
     sectionHead('OPERACIONES DE HOY', '<small class="muted">' + done + '/' + total + '</small>') +
     '<div class="panel today-bar"><div class="row"><span>Progreso del día</span><b>' + Math.round(pct(done, total)) + '%</b></div><div class="xp-track thin"><div class="xp-fill" style="width:' + pct(done, total) + '%"></div></div></div>' +
     '<div class="mission-list tight">' + (pending.map(missionCard).join('') || empty('trophy', 'Todas las órdenes del día completadas. Descansa y prepara la siguiente jornada.')) + '</div>' +
-    (state.missions.filter(m => !m.completed).length > 3 ? '<div class="more-link">' + linkBtn('Ver las ' + (state.missions.filter(m => !m.completed).length - 3) + ' restantes', 'missions') + '</div>' : '') +
-    sectionHead('JEFE DE LA SEMANA', linkBtn('Retos', 'missions')) + bossCard(true) +
-    sectionHead('RUTINAS DE RESPUESTA', '<small class="muted">Recompensa menor</small>') + '<div class="mission-list tight">' + recurrentCards() + '</div>' +
+    (act.filter(m => !m.completed).length > 3 ? '<div class="more-link">' + linkBtn('Ver las ' + (act.filter(m => !m.completed).length - 3) + ' restantes', 'missions') + '</div>' : '') +
+    sectionHead('JEFE DE LA SEMANA', linkBtn('Retos', 'missions'), 'CAMBIA CADA VIERNES 00:00') + bossCard(true) +
+    sectionHead('RUTINAS DE RESPUESTA', '<small class="muted">Avisos cada pocas horas</small>') + '<div class="mission-list tight">' + recurrentCards() + '</div>' +
     sectionHead('RECOMPENSA DE CREADOR', '<small class="muted">Cada 24 horas</small>') +
     '<div class="panel glow creator-reward"><div class="row"><div class="creator-icon" aria-hidden="true">' + ic('music', 22) + '</div><div class="creator-copy"><b>Apoya a JoserBlood en TikTok</b><small class="muted">' + (tiktokReady() ? 'Video disponible · +100 XP' : 'Vuelve en ' + tiktokRemaining()) + '</small></div><button class="btn primary" data-act="tiktok" ' + (tiktokReady() ? '' : 'disabled') + '>+100 XP</button></div></div>' +
     '</section>';
 }
 
 /* ---------- jefe y retos ---------- */
-function bossCard(compact) {
+function bossClockText(ms) {
+  const t = Math.max(0, Math.floor(ms / 1000)), d = Math.floor(t / 86400), h = Math.floor(t % 86400 / 3600), m = Math.floor(t % 3600 / 60), sec = t % 60;
+  return (d ? d + 'd ' : '') + pad2(h) + ':' + pad2(m) + ':' + pad2(sec);
+}
+function bossCard() {
   const b = state.boss; if (!b.max) return '';
-  const p = pct(b.dealt, b.max), dead = b.dealt >= b.max;
-  return '<div class="panel boss ' + (dead ? 'dead' : '') + (b.image ? ' has-art' : '') + '" data-key="boss">' + (b.image ? '<img class="boss-art" src="' + esc(b.image) + '" alt="' + esc(b.name) + '" decoding="async">' : '<div class="boss-ico">' + ic(b.icon, 30) + '</div>') + '<div class="boss-body"><div class="row"><b>' + esc(b.name) + '</b><span class="pill">' + fmt(b.dealt) + ' / ' + fmt(b.max) + '</span></div>' +
+  const p = pct(b.dealt, b.max), dead = b.dealt >= b.max, end = bossEndsAt(), xp = b.xp || 120, coins = b.coins || 150;
+  return '<div class="panel boss ' + (dead ? 'dead' : '') + (b.image ? ' has-art' : '') + '" data-key="boss">' + (b.image ? '<img class="boss-art" src="' + esc(b.image) + '" alt="' + esc(b.name) + '" decoding="async">' : '<div class="boss-ico">' + ic(b.icon, 30) + '</div>') + '<div class="boss-body"><div class="row"><b>' + esc(b.name) + '</b><span class="pill">' + fmt(b.dealt) + ' / ' + fmt(b.max) + ' PV</span></div>' +
     '<small class="muted">' + esc(b.desc) + '</small><div class="xp-track boss-bar"><div class="xp-fill" style="width:' + p + '%"></div></div>' +
-    '<small class="muted">Cada XP que ganas le hace daño. Derrótalo para ganar +120 XP y +150 monedas.</small>' +
+    '<div class="boss-timer">' + ic('timer', 14) + '<span>' + (dead ? 'Llega el siguiente en' : 'Escapa en') + '</span><b class="boss-clock" data-end="' + end + '">' + bossClockText(end - Date.now()) + '</b></div>' +
+    '<small class="muted">Cada XP que ganas le hace daño. Botín: +' + fmt(xp) + ' XP · +' + fmt(coins) + ' monedas y su ícono de perfil' + (dead ? '.' : ', solo si lo derrotas antes de que escape.') + '</small>' +
+    (state.bossNote ? '<small class="boss-note">Anterior: ' + esc(state.bossNote) + '</small>' : '') +
     (dead ? (b.claimed ? '<div class="pill ok mt">BOTÍN RECLAMADO</div>' : '<button class="btn gold full mt" data-act="claimBoss">' + ic('gift', 16) + ' Reclamar botín</button>') : '') + '</div></div>';
 }
 function questsPanel() {
@@ -127,13 +146,14 @@ function viewMissions() {
   const tabs = [['today', 'Hoy'], ['week', 'Semana']];
   let body;
   if (missionTab === 'week') {
-    body = sectionHead('RETOS SEMANALES', '<small class="muted">Se renuevan el lunes</small>') + questsPanel() + sectionHead('JEFE SEMANAL') + bossCard(false);
+    body = sectionHead('RETOS SEMANALES', '<small class="muted">Se renuevan el lunes</small>') + questsPanel() + sectionHead('JEFE SEMANAL', '<small class="muted">Cambia el viernes</small>') + bossCard();
   } else {
-    const list = sortedMissions(state.missions.filter(m => filter === 'Todas' || (filter === 'Pendientes' && !m.completed) || (filter === 'Completadas' && m.completed)));
+    const list = sortedMissions(activeMissions().filter(m => filter === 'Todas' || (filter === 'Pendientes' && !m.completed) || (filter === 'Completadas' && m.completed)));
     body = '<div class="chips">' + ['Todas', 'Pendientes', 'Completadas'].map(x => '<button class="chip ' + (filter === x ? 'active' : '') + '" data-act="filter" data-v="' + x + '">' + x + '</button>').join('') + '</div>' +
       '<div class="mission-list">' + (list.map(missionCard).join('') || empty('list', 'No hay misiones en este filtro.')) + '</div>' +
-      sectionHead('MICRO-ÓRDENES', '<small class="muted">XP limitada por día</small>') + '<div class="mission-list tight">' + recurrentCards() + '</div>' +
-      '<div class="notice">Las tareas recurrentes dan XP menor y tienen límite diario. Tómalas como recordatorios, no como presión.</div>';
+      scheduledList() +
+      sectionHead('MICRO-ÓRDENES', '<small class="muted">Recordatorios por horas</small>') + '<div class="mission-list tight">' + recurrentCards() + '</div>' +
+      '<div class="notice">Elige cada cuántas horas quieres el aviso (de ' + RECUR_FROM + ':00 a ' + RECUR_TO + ':59). Dan XP menor y solo una vez por intervalo.</div>';
   }
   return '<section class="view">' + sectionHead('MISIONES', '<button class="btn primary" data-act="newMission">' + ic('plus', 15) + ' Crear</button>', 'TABLERO DE ÓRDENES') +
     '<div class="seg" role="tablist">' + tabs.map(t => '<button class="seg-btn ' + (missionTab === t[0] ? 'active' : '') + '" data-act="mtab" data-v="' + t[0] + '" role="tab">' + t[1] + '</button>').join('') + '</div>' + body + '</section>';
@@ -147,7 +167,7 @@ function viewAction() {
 }
 function focusPanel() {
   const a = state.focus.active, cap = FOCUS_XP_DAY_CAP, used = state.focus.xpDay.day === today() ? state.focus.xpDay.xp : 0;
-  const pend = state.missions.filter(m => !m.completed);
+  const pend = activeMissions().filter(m => !m.completed);
   const stats = '<div class="two-col"><div class="mini-stat"><small>Sesiones totales</small><b>' + fmt(state.focus.sessions) + '</b></div><div class="mini-stat"><small>Minutos enfocados</small><b>' + fmt(state.focus.minutes) + '</b></div></div>';
   if (a) {
     const total = a.minutes * 60000, left = Math.max(0, a.end - Date.now()), mission = a.missionId ? findMission(a.missionId) : null;
@@ -226,12 +246,24 @@ function shopCard(kind, it, owned, equipped) {
   const btn = equipped ? '<button class="btn success" disabled>' + ic('check', 14) + ' En uso</button>' : owned ? '<button class="btn" data-act="equip" data-kind="' + kind + '" data-id="' + esc(it.id) + '">Usar</button>' : '<button class="btn gold" data-act="buy" data-kind="' + kind + '" data-id="' + esc(it.id) + '">' + ic('coin', 14) + ' ' + it.price + '</button>';
   return '<div class="panel shop-card ' + (equipped ? 'equipped' : '') + '" data-key="s-' + kind + '-' + esc(it.id) + '">' + prev + '<div class="shop-body"><b>' + esc(it.name) + '</b>' + (it.desc ? '<small class="muted block">' + esc(it.desc) + '</small>' : '') + '</div>' + btn + '</div>';
 }
+function bossShop() {
+  const none = !state.avatar;
+  const head = '<div class="notice">Derrota al jefe de la semana para desbloquear su ícono y usarlo como foto de perfil. Jefes derrotados: ' + state.defeated.length + '</div>';
+  const mine = '<div class="panel shop-card ' + (none ? 'equipped' : '') + '" data-key="s-avatar-none"><div class="boss-prev">' + (state.profilePhoto ? '<img src="' + state.profilePhoto + '" alt="">' : ic('user', 24)) + '</div><div class="shop-body"><b>Mi foto de perfil</b><small class="muted block">Tu foto o el ícono por defecto</small></div>' +
+    (none ? '<button class="btn success" disabled>' + ic('check', 14) + ' En uso</button>' : '<button class="btn" data-act="equip" data-kind="avatar" data-id="">Usar</button>') + '</div>';
+  return head + mine + state.defeated.map(d => {
+    const on = state.avatar === d.key;
+    return '<div class="panel shop-card ' + (on ? 'equipped' : '') + '" data-key="s-avatar-' + esc(d.key) + '"><div class="boss-prev">' + (d.image ? '<img src="' + esc(d.image) + '" alt="">' : ic(d.icon || 'skull', 24)) + '</div><div class="shop-body"><b>' + esc(d.name) + '</b><small class="muted block">Jefe derrotado</small></div>' +
+      (on ? '<button class="btn success" disabled>' + ic('check', 14) + ' En uso</button>' : '<button class="btn" data-act="equip" data-kind="avatar" data-id="' + esc(d.key) + '">Usar</button>') + '</div>';
+  }).join('');
+}
 function viewShop() {
-  const tabs = [['themes', 'Temas'], ['frames', 'Marcos'], ['titles', 'Títulos'], ['items', 'Objetos']];
+  const tabs = [['themes', 'Temas'], ['frames', 'Marcos'], ['titles', 'Títulos'], ['bosses', 'Jefes'], ['items', 'Objetos']];
   let body = '';
   if (shopTab === 'themes') body = THEMES.map(t => shopCard('theme', t, state.owned.themes.includes(t.id), state.theme === t.id)).join('');
   if (shopTab === 'frames') body = FRAMES.map(t => shopCard('frame', t, state.owned.frames.includes(t.id), state.frame === t.id)).join('');
   if (shopTab === 'titles') body = TITLES.map(t => shopCard('title', t, state.owned.titles.includes(t.id), state.title === t.id)).join('');
+  if (shopTab === 'bosses') body = bossShop();
   if (shopTab === 'items') body = CONSUMABLES.map(t => shopCard('item', t, false, false)).join('') + '<div class="notice">Tienes ' + state.shields + ' escudo(s) de racha' + (boostActive() ? ' y un elixir activo hasta las ' + new Date(state.boostUntil).toLocaleTimeString('es-BO', { hour: '2-digit', minute: '2-digit' }) : '') + '.</div>';
   return '<section class="view">' + sectionHead('TIENDA', '<span class="pill gold-p">' + ic('coin', 13) + ' ' + fmt(state.coins) + '</span>', 'GASTA TUS MONEDAS') +
     '<div class="seg" role="tablist">' + tabs.map(t => '<button class="seg-btn ' + (shopTab === t[0] ? 'active' : '') + '" data-act="stab" data-v="' + t[0] + '" role="tab">' + t[1] + '</button>').join('') + '</div><div class="mission-list tight">' + body + '</div></section>';
@@ -252,8 +284,7 @@ function viewSettings() {
     '<div class="setting-row col"><span>Tema de color</span><div class="theme-row">' + THEMES.map(t => { const own = state.owned.themes.includes(t.id); return '<button class="theme-dot ' + (state.theme === t.id ? 'active ' : '') + (own ? '' : 'locked') + '" style="--a:' + t.swatch[0] + ';--b:' + t.swatch[1] + '" data-act="themeDot" data-id="' + t.id + '" aria-label="' + t.name + (own ? '' : ' (bloqueado)') + '">' + (own ? '' : ic('lock', 14)) + '</button>'; }).join('') + '</div><small class="muted">Los temas bloqueados se compran en la <button class="link-btn" data-act="nav" data-v="shop">Tienda</button>.</small></div>' +
     toggle('fx', 'Animaciones y partículas', 'Efectos al completar misiones') + '</div>' +
     '<div class="panel"><h3>' + ic('bell', 18) + ' Notificaciones</h3><div class="setting-row"><span>Permitir notificaciones</span><button class="btn" data-act="notif">' + (state.settings.notifications ? 'Desactivar' : 'Activar') + '</button></div>' +
-    selectRow('waterInterval', 'Agua · intervalo', [[60, '60 min'], [90, '90 min'], [120, '120 min'], [180, '180 min']]) +
-    selectRow('stretchInterval', 'Pausa activa', [[90, '90 min'], [120, '120 min'], [180, '180 min'], [240, '240 min']]) +
+    '<small class="muted block">Los avisos de agua y pausa activa se configuran en cada rutina, en Misiones.</small>' +
     (Native.has() && exact === false ? '<div class="notice">Las alarmas exactas están desactivadas: los avisos pueden retrasarse. <button class="btn" data-act="exact">Permitir alarmas exactas</button></div>' : '') + '</div>' +
     '<div class="panel"><h3>' + ic('volume', 18) + ' Audio y tacto</h3>' + toggle('music', 'Música ambiental', 'Ambiente RPG oscuro, se puede apagar cuando quieras') + toggle('sound', 'Efectos de sonido') +
     '<div class="setting-row"><span>Volumen</span><input type="range" min="0" max="1" step=".05" data-setting="volume" value="' + state.settings.volume + '"></div>' + toggle('haptics', 'Vibración', 'Respuesta háptica al completar') +

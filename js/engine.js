@@ -25,17 +25,29 @@ function weeklyAdd(stat, n) { ensureWeek(); state.weekly.progress[stat] = (state
 
 /* ---------- jefe semanal y retos ---------- */
 function bossHit(dmg) {
+  ensureBoss();                       // si ya pasó el viernes 00:00, el golpe es para el jefe nuevo
   const b = state.boss; if (!b.max || b.dealt >= b.max) return;
   const was = b.dealt;
   b.dealt = Math.min(b.max, b.dealt + dmg);
-  if (was < b.max && b.dealt >= b.max) setTimeout(() => { toast('¡' + b.name + ' ha caído! Reclama tu botín.'); sound('unlock'); haptic([60, 40, 90]); FX.rain(); }, 500);
+  if (was < b.max && b.dealt >= b.max) {
+    recordDefeat(b);
+    setTimeout(() => { toast('¡' + b.name + ' ha caído! Reclama tu botín y su ícono en la tienda.'); sound('unlock'); haptic([60, 40, 90]); FX.rain(); }, 500);
+  }
+}
+/* El botín solo se entrega si el jefe fue derrotado. */
+function grantBoss(b, auto) {
+  if (b.dealt < b.max || b.claimed) return;
+  b.claimed = true;
+  const xp = b.xp || 120, coins = b.coins || 150;
+  state.coins += coins;
+  addXP(xp, 'Jefe derrotado: ' + b.name, { noBoss: true, noBoost: true });
+  if (auto) setTimeout(() => toast('Botín de ' + b.name + ': +' + xp + ' XP y +' + coins + ' monedas'), 600);
+  return { xp, coins };
 }
 function claimBoss() {
   const b = state.boss;
-  if (b.dealt < b.max || b.claimed) return;
-  b.claimed = true; state.coins += 150;
-  addXP(120, 'Jefe derrotado: ' + b.name, { noBoss: true, noBoost: true });
-  toast('Botín del jefe: +120 XP y +150 monedas'); sound('level'); FX.rain(); haptic([40, 30, 40]);
+  const r = grantBoss(b, false); if (!r) return;
+  toast('Botín del jefe: +' + r.xp + ' XP y +' + r.coins + ' monedas'); sound('level'); FX.rain(); haptic([40, 30, 40]);
   save(); render();
 }
 function claimQuest(id, origin) {
@@ -91,10 +103,14 @@ function toggleSub(id, i, origin) {
   sound('select'); haptic(10); save();
   if (m.subtasks.every(s => s.done)) completeMission(id, origin); else render();
 }
+const recurMs = r => state.settings[r.every] * 3600000;
+const recurLeft = r => Math.max(0, (state.recurrent.last[r.id] || 0) + recurMs(r) - Date.now());
+function fmtLeft(ms) { const m = Math.ceil(ms / 60000); return m >= 60 ? Math.floor(m / 60) + ' h ' + pad2(m % 60) + ' min' : m + ' min'; }
 function completeRecurrent(id, origin) {
-  const r = RECUR.find(x => x.id === id), n = state.recurrent.counts[id] || 0;
-  if (!r || n >= r.max) return;
-  state.recurrent.counts[id] = n + 1;
+  const r = RECUR.find(x => x.id === id); if (!r) return;
+  if (recurLeft(r) > 0) { toast('Disponible de nuevo en ' + fmtLeft(recurLeft(r))); return; }
+  state.recurrent.last[id] = Date.now();
+  state.recurrent.counts[id] = (state.recurrent.counts[id] || 0) + 1;
   if (id === 'water-repeat') weeklyAdd('water', 1);
   const gain = addXP(r.xp, 'Rutina recurrente: ' + r.name, { origin });
   Native.syncReminders(); sound('complete'); haptic(14);
@@ -109,6 +125,7 @@ function allocAttribute(key) {
 function missionFromForm(f, base) {
   const subs = String(f.subs || '').split('\n').map(x => x.trim()).filter(Boolean).slice(0, 12);
   const old = (base && base.subtasks) || [];
+  const days = (f.days && f.days.length) ? f.days.map(Number) : [0, 1, 2, 3, 4, 5, 6];
   const m = Object.assign({}, base || {}, {
     id: (base && base.id) || 'custom-' + Date.now(),
     name: f.name.trim().slice(0, 60),
@@ -117,8 +134,8 @@ function missionFromForm(f, base) {
     type: f.type, priority: f.priority, custom: true,
     icon: TYPE_ICON[f.type] || 'star',
     subtasks: subs.map(t => ({ t, done: !!(old.find(o => o.t === t) || {}).done })),
-    reminderEnabled: !!f.reminder, reminderTime: f.time || '18:00',
-    reminderDays: f.days === 'weekdays' ? [1, 2, 3, 4, 5] : f.days === 'weekend' ? [0, 6] : [0, 1, 2, 3, 4, 5, 6]
+    reminderEnabled: !!f.reminder, reminderTime: f.time || '18:00', reminderDays: days,
+    schedule: f.scheduled ? { days, time: f.time || '18:00' } : null
   });
   if (!base) { m.accepted = false; m.completed = false; }
   return m;
@@ -251,6 +268,7 @@ function buy(kind, id) {
 function equip(kind, id, silent) {
   if (kind === 'theme') { state.theme = id; applyTheme(); }
   if (kind === 'frame') state.frame = id;
+  if (kind === 'avatar') state.avatar = id;
   if (kind === 'title') state.title = id;
   save(); if (!silent) { sound('select'); render(); }
 }
@@ -295,10 +313,11 @@ function checkReminders() {
     }
   });
   const minutes = now.getHours() * 60 + now.getMinutes();
-  if (minutes >= 480 && minutes <= 1260) {
+  if (minutes >= RECUR_FROM * 60 && minutes < (RECUR_TO + 1) * 60) {
     RECUR.forEach(r => {
-      const interval = state.settings[r.setting] || r.interval, slot = Math.floor((minutes - 480) / interval), id = today() + '-' + r.id + '-' + slot;
-      if (slot >= 0 && (state.recurrent.counts[r.id] || 0) < r.max && !state.notified.includes(id)) { webNotify('Recordatorio de Trabaja', r.name); state.notified.push(id); }
+      if (!state.settings[r.on]) return;
+      const slot = Math.floor((minutes - RECUR_FROM * 60) / (state.settings[r.every] * 60)), id = today() + '-' + r.id + '-' + slot;
+      if (!state.notified.includes(id)) { state.notified.push(id); if (recurLeft(r) <= 0) webNotify('Recordatorio de Trabaja', r.name); }
     });
   }
   save();
@@ -345,7 +364,7 @@ function saveProfilePhoto(file) {
     img.onload = () => {
       const max = 384, sc = Math.min(1, max / Math.max(img.width, img.height)), w = Math.round(img.width * sc), h = Math.round(img.height * sc), cv = document.createElement('canvas');
       cv.width = w; cv.height = h; cv.getContext('2d').drawImage(img, 0, 0, w, h);
-      try { state.profilePhoto = cv.toDataURL('image/jpeg', .8); save(); render(); toast('Foto de perfil actualizada'); } catch (e) { toast('No se pudo guardar la foto; prueba una imagen más pequeña'); }
+      try { state.profilePhoto = cv.toDataURL('image/jpeg', .8); state.avatar = ''; save(); render(); toast('Foto de perfil actualizada'); } catch (e) { toast('No se pudo guardar la foto; prueba una imagen más pequeña'); }
     };
     img.onerror = () => toast('No se pudo abrir la imagen');
     img.src = reader.result;

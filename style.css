@@ -361,3 +361,27 @@ select{width:auto;max-width:60%;min-height:40px}.field select{width:100%;max-wid
 @media (max-width:360px){.hero-copy{max-width:66%}.shadow-grid{gap:9px}.nav-item small{font-size:9.5px}}
 @media (min-width:620px){main{padding-top:24px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* ---- v2.1: jefe con cuenta atrás, días, rutinas por horas, íconos de jefe ---- */
+.boss-timer{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted)}
+.boss-timer svg{color:var(--bad)}
+.boss-clock{font-variant-numeric:tabular-nums;color:var(--text);font-weight:800;letter-spacing:.02em}
+.boss.dead .boss-timer svg{color:var(--ok)}
+.boss-note{font-size:12px;color:var(--muted);font-style:italic}
+.recurrent-card{flex-wrap:wrap}
+.rc-cfg{flex-basis:100%;display:flex;align-items:center;gap:10px;padding-top:10px;margin-top:2px;border-top:1px solid var(--line)}
+.rc-cfg-l{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);font-weight:600;margin-right:auto}
+.rc-cfg select{max-width:none;min-height:36px;font-size:13px}
+.daychips{display:flex;gap:6px;justify-content:space-between}
+.dchip{position:relative;flex:1;min-width:0}
+.dchip input{position:absolute;inset:0;opacity:0;margin:0;min-height:0;width:100%;height:100%;cursor:pointer}
+.dchip span{display:grid;place-items:center;height:42px;border-radius:12px;background:var(--panel);border:1px solid var(--line);font-weight:700;font-size:13.5px;color:var(--muted);transition:all .25s var(--ease)}
+.dchip input:checked+span{background:linear-gradient(135deg,var(--acc),var(--acc2));color:var(--on-acc);border-color:transparent}
+.dchip input:focus-visible+span{outline:2px solid var(--acc2);outline-offset:2px}
+.day-presets{display:flex;gap:6px;flex-wrap:wrap;margin-top:2px}
+.day-presets .chip{min-height:32px;padding:0 12px;font-size:12px}
+.sched-row{display:flex;align-items:center;gap:12px;padding:12px 14px}
+.sched-row .mission-body{flex:1;min-width:0}.sched-row small{display:block}
+.boss-prev{width:52px;height:52px;border-radius:50%;overflow:hidden;display:grid;place-items:center;flex:none;background:var(--acc-soft);color:var(--acc);border:2px solid var(--acc-line)}
+.boss-prev img{width:100%;height:100%;object-fit:cover;object-position:top}
+.profile-avatar.boss-av img{object-position:top}

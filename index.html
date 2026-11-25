@@ -37,11 +37,10 @@
     </div>
     <label class="field">Tipo<select id="mType"><option>Personal</option><option>Salud</option><option>Estudio</option><option>Trabajo</option><option>Disciplina</option></select></label>
     <label class="field">Subtareas (una por línea)<textarea id="mSubs" rows="3" maxlength="600" placeholder="Paso 1&#10;Paso 2"></textarea></label>
-    <div class="setting-row"><span>Recordatorio diario</span><label class="switch"><input type="checkbox" id="mReminder"><i></i></label></div>
-    <div class="two-col">
-      <label class="field">Hora<input id="mTime" type="time" value="18:00"></label>
-      <label class="field">Días<select id="mDays"><option value="all">Todos</option><option value="weekdays">Lunes a viernes</option><option value="weekend">Fin de semana</option></select></label>
-    </div>
+    <div class="setting-row"><span>Programar misión<small class="muted block">Solo aparece en los días y desde la hora que elijas</small></span><label class="switch"><input type="checkbox" id="mScheduled"><i></i></label></div>
+    <div class="field">Días<div class="daychips" id="mDayChips"></div><div class="day-presets"><button type="button" class="chip" data-act="dayPreset" data-target="mDayChips" data-v="all">Todos</button><button type="button" class="chip" data-act="dayPreset" data-target="mDayChips" data-v="weekdays">Lunes a viernes</button><button type="button" class="chip" data-act="dayPreset" data-target="mDayChips" data-v="weekend">Fin de semana</button></div></div>
+    <label class="field">Hora<input id="mTime" type="time" value="18:00"></label>
+    <div class="setting-row"><span>Avisarme a esa hora<small class="muted block">Notificación en los días elegidos</small></span><label class="switch"><input type="checkbox" id="mReminder"><i></i></label></div>
     <div class="modal-actions end"><button type="button" class="btn ghost" data-act="closeMission">Cancelar</button><button type="submit" class="btn primary" id="missionSubmit">Crear misión</button></div>
   </form>
 </dialog>
@@ -50,10 +49,8 @@
   <form id="reminderForm" method="dialog">
     <div class="dialog-head"><div><span class="eyebrow">RECORDATORIO</span><h2 id="rTitle">Misión</h2></div><button type="button" class="icon-btn" data-act="closeReminder" aria-label="Cerrar">✕</button></div>
     <div class="setting-row"><span>Activar aviso</span><label class="switch"><input type="checkbox" id="rEnabled"><i></i></label></div>
-    <div class="two-col">
-      <label class="field">Hora<input id="rTime" type="time" value="18:00"></label>
-      <label class="field">Días<select id="rDays"><option value="all">Todos</option><option value="weekdays">Lunes a viernes</option><option value="weekend">Fin de semana</option></select></label>
-    </div>
+    <label class="field">Hora<input id="rTime" type="time" value="18:00"></label>
+    <div class="field">Días<div class="daychips" id="rDayChips"></div><div class="day-presets"><button type="button" class="chip" data-act="dayPreset" data-target="rDayChips" data-v="all">Todos</button><button type="button" class="chip" data-act="dayPreset" data-target="rDayChips" data-v="weekdays">Lunes a viernes</button><button type="button" class="chip" data-act="dayPreset" data-target="rDayChips" data-v="weekend">Fin de semana</button></div></div>
     <p class="muted small" id="rNote"></p>
     <div class="modal-actions end"><button type="button" class="btn ghost" data-act="closeReminder">Cancelar</button><button type="submit" class="btn primary">Guardar</button></div>
   </form>

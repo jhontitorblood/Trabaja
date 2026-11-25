@@ -36,12 +36,12 @@ function initial() {
     points: 0, coins: 0, totalMissions: 0, streak: 0, bestStreak: 0, lastCompletedDay: null, lastDay: '',
     missions: [], customMissions: [], history: [], achievements: [],
     inventory: [{ id: 'starter', name: 'Insignia del Despertar', desc: 'Tu primer símbolo de cazador.', icon: 'sparkle', rarity: 'Común' }],
-    recurrent: { day: d, counts: {} },
+    recurrent: { day: d, counts: {}, last: {} },
     workout: { day: d, sessionDone: false, week: 0, count: 0, progress: {}, adapt: {} },
     settings: {
       notifications: false, sound: true,
       sounds: { menu: true, select: true, complete: true, fail: true, level: true, unlock: true },
-      volume: .3, waterInterval: 120, stretchInterval: 180, music: false, haptics: true, fx: true, mode: 'dark'
+      volume: .3, waterOn: true, waterEvery: 2, stretchOn: true, stretchEvery: 3, music: false, haptics: true, fx: true, mode: 'dark'
     },
     notified: [], createdAt: new Date().toISOString(), tiktokRewardAt: 0,
     theme: 'violet', frame: 'none', title: '', featured: '',
@@ -49,7 +49,8 @@ function initial() {
     shields: 0, boostUntil: 0, shieldNote: '',
     days: {},
     weekly: { id: '', quests: [], progress: {}, claimed: {} },
-    boss: { id: '', name: '', icon: 'skull', image: '', desc: '', max: 0, dealt: 0, claimed: false },
+    boss: { id: '', key: '', name: '', icon: 'skull', image: '', desc: '', max: 0, dealt: 0, claimed: false, xp: 120, coins: 150 },
+    defeated: [], avatar: '', bossNote: '',
     focus: { sessions: 0, minutes: 0, active: null, xpDay: { day: '', xp: 0 }, lastDone: null }
   };
 }
@@ -62,6 +63,11 @@ function fixMission(m) {
   if (!PRIORITIES[m.priority]) m.priority = 'media';
   m.subtasks = Array.isArray(m.subtasks) ? m.subtasks.filter(s => s && s.t).map(s => ({ t: String(s.t), done: !!s.done })) : [];
   m.xp = Number(m.xp) || 10;
+  const sc = m.schedule;
+  if (sc && Array.isArray(sc.days) && /^\d{1,2}:\d{2}$/.test(String(sc.time || ''))) {
+    const days = uniq(sc.days.map(Number).filter(d => d >= 0 && d <= 6));
+    m.schedule = days.length ? { days, time: String(sc.time).padStart(5, '0') } : null;
+  } else m.schedule = null;
   return m;
 }
 
@@ -73,8 +79,19 @@ function migrate(raw) {
   s.settings = Object.assign({}, f.settings, s.settings || {});
   s.settings.sounds = Object.assign({}, f.settings.sounds, (raw && raw.settings && raw.settings.sounds) || {});
   s.stats = Object.assign({}, f.stats, s.stats || {});
-  s.recurrent = Object.assign({ day: today(), counts: {} }, s.recurrent || {});
+  s.recurrent = Object.assign({ day: today(), counts: {}, last: {} }, s.recurrent || {});
   s.recurrent.counts = s.recurrent.counts || {};
+  s.recurrent.last = s.recurrent.last || {};
+  // versiones anteriores: intervalo en minutos -> ahora en horas
+  const rs = (raw && raw.settings) || {};
+  if (rs.waterEvery == null && rs.waterInterval) s.settings.waterEvery = clamp(Math.round(rs.waterInterval / 60), 1, 6);
+  if (rs.stretchEvery == null && rs.stretchInterval) s.settings.stretchEvery = clamp(Math.round(rs.stretchInterval / 60), 1, 6);
+  delete s.settings.waterInterval; delete s.settings.stretchInterval;
+  RECUR.forEach(r => { s.settings[r.every] = RECUR_HOURS.includes(Number(s.settings[r.every])) ? Number(s.settings[r.every]) : r.hours; s.settings[r.on] = s.settings[r.on] !== false; });
+  s.defeated = (Array.isArray(s.defeated) ? s.defeated : []).filter(d => d && d.key && d.name);
+  s.bossNote = String(s.bossNote || '');
+  if (s.avatar && !s.defeated.some(d => d.key === s.avatar)) s.avatar = '';
+  if (s.boss && s.boss.max && !s.boss.key) s.boss.key = s.boss.image || 'n:' + s.boss.name;
   s.workout = Object.assign({}, f.workout, s.workout || {});
   s.workout.progress = s.workout.progress || {};
   s.workout.adapt = s.workout.adapt || {};
@@ -162,29 +179,63 @@ function checkStreakBreak(d) {
 
 /* ---------- semana: retos y jefe ---------- */
 function questName(q) { return q.name.replace('{n}', q.target); }
-/* Jefe con imagen propia: se elige una al azar por semana (misma semana = misma imagen). */
-function applyBossImage(w) {
-  if (!BOSS_IMAGES.length) { state.boss.image = ''; return; }
-  const p = BOSS_IMAGES[Math.floor(rng(hashStr('bossimg' + w))() * BOSS_IMAGES.length)];
-  state.boss.image = p.image; state.boss.name = p.name; state.boss.desc = BOSS_DESC;
-}
+/* Retos semanales: cambian cada lunes. */
 function ensureWeek() {
   const w = weekId(new Date());
-  if (state.weekly.id === w && state.boss.id === w) {
-    // si se añadieron o quitaron imágenes a mitad de semana, se actualiza sin perder el daño hecho
-    const cur = state.boss.image || '';
-    if ((!cur && BOSS_IMAGES.length) || (cur && !BOSS_IMAGES.some(x => x.image === cur))) { applyBossImage(w); save(); }
-    return;
-  }
+  if (state.weekly.id === w) return;
   const r = rng(hashStr('week' + w));
   const quests = shuffle(WEEKLY_POOL, r).slice(0, 3).map(p => ({
     id: p.id, stat: p.stat, icon: p.icon, name: p.name, xp: p.xp, coins: p.coins,
     target: p.targets[Math.floor(r() * p.targets.length)]
   }));
   state.weekly = { id: w, quests, progress: {}, claimed: {} };
-  const b = BOSSES[Math.floor(r() * BOSSES.length)];
-  state.boss = { id: w, name: b.name, icon: b.icon, desc: b.desc, max: Math.round((350 + state.level * 30) / 10) * 10, dealt: 0, claimed: false, image: '' };
-  applyBossImage(w);
+  save();
+}
+
+/* Jefe: cambia cada viernes a las 00:00 (hora local), lo derrotes o no. */
+function bossCycleStart(now) {
+  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  d.setDate(d.getDate() - ((d.getDay() - 5 + 7) % 7));
+  return d;
+}
+const bossCycleId = now => dayKey(bossCycleStart(now || new Date()));
+function bossEndsAt(now) { const d = bossCycleStart(now || new Date()); d.setDate(d.getDate() + 7); return d.getTime(); }
+function bossCycleNumber(now) { const c = bossCycleStart(now || new Date()); c.setHours(12); return Math.round((c - BOSS_EPOCH) / (7 * 864e5)); }
+function bossPool() {
+  const src = BOSS_IMAGES.length ? BOSS_IMAGES : BOSSES;
+  return src.map(b => ({ key: b.image || 'n:' + b.name, name: b.name, image: b.image || '', icon: b.icon || 'skull', desc: b.desc, max: Math.max(50, Number(b.hp) || 600), xp: Number(b.xp) || 120, coins: Number(b.coins) || 150 }));
+}
+/* Orden aleatorio sin repetir: cada ronda recorre todos los jefes una vez. */
+function bossForCycle(n, pool) {
+  const len = pool.length, round = Math.floor(n / len), pos = ((n % len) + len) % len;
+  const order = r => shuffle(pool, rng(hashStr('bossround' + r)));
+  const o = order(round);
+  if (len > 1 && order(round - 1)[len - 1].key === o[0].key) { const t = o[0]; o[0] = o[1]; o[1] = t; }
+  return o[pos];
+}
+function bossFrom(p, cycle) { return { id: cycle, key: p.key, name: p.name, icon: p.icon, image: p.image, desc: p.desc, max: p.max, dealt: 0, claimed: false, xp: p.xp, coins: p.coins }; }
+function recordDefeat(b) {
+  if (!b.key || state.defeated.some(d => d.key === b.key)) return;
+  state.defeated.push({ key: b.key, name: b.name, image: b.image || '', icon: b.icon || 'skull', at: Date.now() });
+}
+function ensureBoss() {
+  const cycle = bossCycleId(), pool = bossPool(), n = bossCycleNumber(), b = state.boss;
+  if (b.id === cycle && b.max) {
+    // si cambian las imágenes a mitad de ciclo, se ajusta el jefe sin perder el daño hecho
+    const dead = b.dealt >= b.max;
+    if (!dead && (!pool.some(x => x.key === b.key) || (!b.image && BOSS_IMAGES.length))) {
+      const nb = bossFrom(bossForCycle(n, pool), cycle);
+      nb.dealt = Math.min(nb.max - 1, Math.floor(nb.max * b.dealt / b.max));
+      state.boss = nb; save();
+    }
+    return;
+  }
+  if (b.max) {
+    const dead = b.dealt >= b.max;
+    if (dead) { recordDefeat(b); if (!b.claimed) grantBoss(b, true); state.bossNote = 'Derrotaste a ' + b.name + '.'; }
+    else state.bossNote = b.name + ' escapó con ' + (b.max - b.dealt) + ' de vida. No hay botín.';
+  }
+  state.boss = bossFrom(bossForCycle(n, pool), cycle);
   save();
 }
 function weekDays() { const m = mondayOf(new Date()); return Array.from({ length: 7 }, (_, i) => { const d = new Date(m); d.setDate(m.getDate() + i); return dayKey(d); }); }
@@ -196,7 +247,7 @@ function updateDay() {
   if (state.lastDay !== d) {
     state.lastDay = d;
     state.missions = buildDaily(d);
-    state.recurrent = { day: d, counts: {} };
+    state.recurrent.day = d; state.recurrent.counts = {};
     state.workout.day = d; state.workout.sessionDone = false; state.workout.progress = {};
     state.notified = [];
     checkStreakBreak(d);
@@ -205,12 +256,29 @@ function updateDay() {
     save();
     if (typeof Native !== 'undefined') Native.syncReminders();
   }
-  if (state.recurrent.day !== d) state.recurrent = { day: d, counts: {} };
+  if (state.recurrent.day !== d) { state.recurrent.day = d; state.recurrent.counts = {}; }
   if (state.workout.day !== d) { state.workout.day = d; state.workout.sessionDone = false; state.workout.progress = {}; }
   ensureWeek();
+  ensureBoss();
 }
 
 /* ---------- cálculos de nivel ---------- */
+/* Misiones programadas: solo aparecen en los días y desde la hora elegidos. */
+const hmNow = () => { const d = new Date(); return pad2(d.getHours()) + ':' + pad2(d.getMinutes()); };
+function missionActive(m) {
+  if (!m.schedule || m.completed) return true;
+  return m.schedule.days.includes(new Date().getDay()) && hmNow() >= m.schedule.time;
+}
+const activeMissions = () => state.missions.filter(missionActive);
+const dayNames = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+function daysText(days) {
+  const d = days.slice().sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7));
+  if (d.length === 7) return 'Todos los días';
+  if (d.length === 5 && !d.includes(0) && !d.includes(6)) return 'Lunes a viernes';
+  if (d.length === 2 && d.includes(0) && d.includes(6)) return 'Fin de semana';
+  return d.map(x => dayNames[x]).join(' · ');
+}
+
 const rankFor = l => l >= 50 ? 'S' : l >= 35 ? 'A' : l >= 25 ? 'B' : l >= 15 ? 'C' : l >= 8 ? 'D' : 'E';
 const xpNext = () => Math.max(100, Math.round(100 * Math.pow(1.5, state.level - 1)));
 const boostActive = () => state.boostUntil > Date.now();

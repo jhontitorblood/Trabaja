@@ -22,7 +22,7 @@ const Native = (() => {
         } else call('cancelReminder', String(m.id));
       });
       RECUR.forEach(r => {
-        if ((state.recurrent.counts[r.id] || 0) < r.max) call('scheduleInterval', r.id, r.name, Number(s[r.setting]) || r.interval);
+        if (s[r.on]) call('scheduleInterval', r.id, r.name, Number(s[r.every]) * 60);
         else call('cancelReminder', r.id);
       });
     } catch (e) { /* el puente puede no estar listo */ }

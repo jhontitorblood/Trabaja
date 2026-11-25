@@ -52,6 +52,7 @@ document.addEventListener('click', ev => {
     case 'awakenNext': { const o = el.closest('.overlay'); if (o) o.remove(); sound('select'); setTimeout(showNextAwakening, 250); break; }
     case 'dlgCancel': confirmCb = null; closeDialog('confirmDialog'); break;
     case 'dlgOk': { const cb = confirmCb; confirmCb = null; closeDialog('confirmDialog'); if (cb) cb(); break; }
+    case 'dayPreset': setDayChips(el.dataset.target, DAY_PRESETS[v]); sound('select'); break;
     case 'closeMission': closeDialog('missionDialog'); break;
     case 'closeReminder': closeDialog('reminderDialog'); break;
   }
@@ -71,7 +72,7 @@ document.addEventListener('change', ev => {
     save();
     if (k === 'music' || k === 'sound' || k === 'volume') { musicVolume(); syncMusic(); }
     if (k === 'mode' || k === 'fx') applyTheme();
-    if (k === 'waterInterval' || k === 'stretchInterval') Native.syncReminders();
+    if (RECUR.some(r => r.on === k || r.every === k)) Native.syncReminders();
     if (k === 'haptics' && t.checked) haptic(20);
     if (k !== 'volume') sound('select');
     render();
@@ -95,6 +96,20 @@ document.addEventListener('pointerdown', ev => {
   b.appendChild(s); setTimeout(() => s.remove(), 600);
 }, { passive: true });
 
+/* ---------- relojes: cuenta atrás del jefe y misiones/rutinas que aparecen con la hora ---------- */
+let lastMinute = '';
+function tickClocks() {
+  if (document.hidden) return;
+  const now = Date.now();
+  document.querySelectorAll('.boss-clock').forEach(el => {
+    const end = Number(el.dataset.end);
+    if (now >= end) { render(); return; }
+    el.textContent = bossClockText(end - now);
+  });
+  const hm = hmNow();
+  if (hm !== lastMinute) { lastMinute = hm; if (view === 'home' || view === 'missions' || view === 'action') render(); }
+}
+
 /* ---------- arranque ---------- */
 function boot() {
   buildChrome();
@@ -106,6 +121,7 @@ function boot() {
   if (state.focus.active) { if (Date.now() >= state.focus.active.end) focusComplete(); else startFocusTicker(); }
   checkUnlocks();
   setInterval(checkReminders, 30000);
+  setInterval(tickClocks, 1000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) { updateDay(); render(); if (state.focus.active) focusTick(); } });
   if (state.settings.mode === 'auto' && window.matchMedia) matchMedia('(prefers-color-scheme: light)').addEventListener('change', applyTheme);
   // la música solo puede empezar tras un gesto del usuario
