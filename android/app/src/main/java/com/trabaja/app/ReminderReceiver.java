@@ -20,7 +20,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         String action = i.getAction();
         String id = i.getStringExtra(ReminderScheduler.EXTRA_ID);
         String title = i.getStringExtra(ReminderScheduler.EXTRA_TITLE);
-        if (title == null || title.trim().isEmpty()) title = "Recordatorio de Trabaja";
+        if (title == null || title.trim().isEmpty()) title = "Recordatorio de Cazador de hábitos";
         boolean snoozed = ReminderScheduler.ACTION_SNOOZED.equals(action);
         if (id != null && id.startsWith("snooze_")) id = id.substring(7);
 
@@ -52,7 +52,7 @@ public class ReminderReceiver extends BroadcastReceiver {
         }
 
         if (Build.VERSION.SDK_INT >= 26) {
-            NotificationChannel ch = new NotificationChannel(CHANNEL, "Recordatorios de Trabaja",
+            NotificationChannel ch = new NotificationChannel(CHANNEL, "Recordatorios de Cazador de hábitos",
                     NotificationManager.IMPORTANCE_DEFAULT);
             ch.setDescription("Avisos de misiones, pausas y sesiones de enfoque");
             nm.createNotificationChannel(ch);
@@ -74,7 +74,7 @@ public class ReminderReceiver extends BroadcastReceiver {
                 ? new Notification.Builder(c, CHANNEL)
                 : new Notification.Builder(c);
         b.setSmallIcon(android.R.drawable.ic_popup_reminder)
-                .setContentTitle("Trabaja · Recordatorio")
+                .setContentTitle("Cazador de hábitos · Recordatorio")
                 .setContentText(title)
                 .setAutoCancel(true)
                 .setCategory(Notification.CATEGORY_REMINDER)

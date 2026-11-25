@@ -1,7 +1,7 @@
 {
   "id": "./",
-  "name": "Trabaja",
-  "short_name": "Trabaja",
+  "name": "Cazador de hábitos",
+  "short_name": "Cazador de hábitos",
   "description": "RPG de hábitos, enfoque, entrenamiento y progresión personal.",
   "lang": "es",
   "start_url": "./?source=pwa",

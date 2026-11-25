@@ -1,6 +1,6 @@
-# Trabaja
+# Cazador de hábitos
 
-RPG de hábitos y productividad personal para Android (y navegador). Es la evolución de **SISTEMA Despertar**: mismas misiones, guerreros y progresión, con un rediseño visual, más dinamismo y una base técnica nueva.
+RPG de hábitos y productividad personal para Android (y navegador). Es la evolución de **SISTEMA Despertar** (antes llamada Trabaja): mismas misiones, guerreros y progresión, con un rediseño visual, más dinamismo y una base técnica nueva.
 
 ## Qué incluye
 
@@ -29,7 +29,7 @@ RPG de hábitos y productividad personal para Android (y navegador). Es la evolu
 ## Compilar el APK
 
 1. En GitHub abre **Actions → Build Android APK → Run workflow** (también corre solo al subir cambios).
-2. Cuando termine, descarga `Trabaja-Android-APK` y dentro estará `Trabaja.apk`.
+2. Cuando termine, descarga `Cazador-de-habitos-APK` y dentro estará `Cazador-de-habitos.apk`.
 
 El APK está firmado con una clave fija incluida en `android/debug.keystore`, así que cada versión nueva se instala **encima** de la anterior sin perder el progreso. Si el repositorio es público, considera pasarlo a privado o usar una clave propia (abajo).
 
@@ -40,11 +40,11 @@ keytool -genkeypair -v -keystore trabaja.keystore -alias trabaja -keyalg RSA -ke
 base64 -w0 trabaja.keystore    # copia el resultado
 ```
 
-En **Settings → Secrets and variables → Actions** crea: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`. El flujo generará además `Trabaja-produccion.apk`. Cambiar de clave exige desinstalar la app: **exporta antes un respaldo** en Ajustes.
+En **Settings → Secrets and variables → Actions** crea: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`. El flujo generará además `Cazador-de-habitos-produccion.apk`. Cambiar de clave exige desinstalar la app: **exporta antes un respaldo** en Ajustes.
 
 ## Pasar tu progreso desde SISTEMA Despertar
 
-En la app vieja: Ajustes → Exportar. En Trabaja: Ajustes → Importar. El respaldo se convierte solo al formato nuevo.
+En la app vieja: Ajustes → Exportar. En Cazador de hábitos: Ajustes → Importar. El respaldo se convierte solo al formato nuevo.
 
 ## Jefes semanales
 

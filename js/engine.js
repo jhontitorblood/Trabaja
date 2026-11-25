@@ -317,7 +317,7 @@ function checkReminders() {
     RECUR.forEach(r => {
       if (!state.settings[r.on]) return;
       const slot = Math.floor((minutes - RECUR_FROM * 60) / (state.settings[r.every] * 60)), id = today() + '-' + r.id + '-' + slot;
-      if (!state.notified.includes(id)) { state.notified.push(id); if (recurLeft(r) <= 0) webNotify('Recordatorio de Trabaja', r.name); }
+      if (!state.notified.includes(id)) { state.notified.push(id); if (recurLeft(r) <= 0) webNotify('Recordatorio de Cazador de hábitos', r.name); }
     });
   }
   save();

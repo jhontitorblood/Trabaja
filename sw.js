@@ -1,5 +1,5 @@
-/* Trabaja — service worker. Versión de caché generada del contenido: 769b56c9 (tools/gen-sw.py) */
-const CACHE = 'trabaja-769b56c9';
+/* Trabaja — service worker. Versión de caché generada del contenido: 15a2fa10 (tools/gen-sw.py) */
+const CACHE = 'trabaja-15a2fa10';
 const CORE = ['./', './index.html', './style.css', './manifest.json', './js/bosses.js', './js/data.js', './js/engine.js', './js/fx.js', './js/icons.js', './js/main.js', './js/native.js', './js/state.js', './js/ui.js', './js/views.js', './assets/fonts/archivo-black.woff', './assets/fonts/inter-400.woff', './assets/fonts/inter-500.woff', './assets/fonts/inter-600.woff', './assets/fonts/inter-700.woff', './assets/img/guardians/00-sistema.webp', './assets/img/guardians/01-killo.webp', './assets/img/guardians/02-minos.webp', './assets/img/guardians/04-mephisto.webp', './assets/img/guardians/06-virgilio.webp', './assets/img/guardians/07-mapache.webp', './assets/img/guardians/08-gatino.webp', './assets/img/guardians/09-maribel.webp', './assets/img/guardians/10-fausto.webp', './assets/img/guardians/11-joserblood-pan.webp', './assets/img/guardians/12-chanco-espectral.webp', './assets/img/guardians/13-joserblood-inframundo.webp', './assets/img/icon-192.png', './assets/img/icon-512.png', './assets/img/icon-maskable-512.png'];
 const OPTIONAL = ['./assets/audio/ambient.mp3'];
 

@@ -189,7 +189,7 @@ function updateFocusUI() {
   const clock = document.getElementById('focusClock'); if (clock) clock.textContent = fmtTime(left);
   const fg = document.querySelector('.focus-live .ring-fg');
   if (fg) { const c = parseFloat(fg.getAttribute('stroke-dasharray')); fg.setAttribute('stroke-dashoffset', (c * (1 - clamp((total - left) / total, 0, 1))).toFixed(2)); }
-  document.title = fmtTime(left) + ' · Trabaja';
+  document.title = fmtTime(left) + ' · Cazador de hábitos';
 }
 function workoutPanel() {
   const type = routineType(), routine = ROUTINES[type], progress = state.workout.progress[type] || {}, completed = state.workout.sessionDone;
@@ -290,6 +290,6 @@ function viewSettings() {
     '<div class="setting-row"><span>Volumen</span><input type="range" min="0" max="1" step=".05" data-setting="volume" value="' + state.settings.volume + '"></div>' + toggle('haptics', 'Vibración', 'Respuesta háptica al completar') +
     '<details class="more"><summary>Sonidos individuales</summary>' + Object.entries(state.settings.sounds).map(e => '<div class="setting-row"><span>' + SOUND_LABELS[e[0]] + '</span><label class="switch"><input type="checkbox" data-sound="' + e[0] + '" ' + (e[1] ? 'checked' : '') + '><i></i></label></div>').join('') + '</details></div>' +
     '<div class="panel"><h3>' + ic('download', 18) + ' Datos y respaldo</h3><div class="modal-actions"><button class="btn" data-act="export">' + ic('download', 15) + ' Exportar</button><button class="btn" data-act="import">' + ic('upload', 15) + ' Importar</button><button class="btn danger" data-act="reset">Restablecer</button><input type="file" id="backupFile" accept="application/json,.json" hidden></div><small class="muted block mt">Tus datos viven en este dispositivo. Exporta un respaldo de vez en cuando.</small></div>' +
-    '<div class="panel"><h3>' + ic('info', 18) + ' Información</h3><p class="muted small">Trabaja V2.1 · Colección de guerreros, tienda, retos semanales y modo enfoque. Funciona sin conexión después de la primera carga.</p></div>' +
+    '<div class="panel"><h3>' + ic('info', 18) + ' Información</h3><p class="muted small">Cazador de hábitos V2.1 · Colección de guerreros, tienda, retos semanales y modo enfoque. Funciona sin conexión después de la primera carga.</p></div>' +
     '</div></section>';
 }

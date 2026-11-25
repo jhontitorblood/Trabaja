@@ -93,14 +93,14 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist
-          cp android/app/build/outputs/apk/debug/app-debug.apk dist/Trabaja.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk dist/Cazador-de-habitos.apk
           if ls android/app/build/outputs/apk/release/*.apk >/dev/null 2>&1; then
-            cp android/app/build/outputs/apk/release/*.apk dist/Trabaja-produccion.apk
+            cp android/app/build/outputs/apk/release/*.apk dist/Cazador-de-habitos-produccion.apk
           fi
           ls -la dist
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Trabaja-Android-APK
+          name: Cazador-de-habitos-APK
           path: dist/*.apk
           retention-days: 30

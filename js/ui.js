@@ -56,7 +56,7 @@ const NAV = [
 function buildChrome() {
   buildDayChips('mDayChips'); buildDayChips('rDayChips');
   document.getElementById('topbar').innerHTML =
-    '<button class="brand" data-act="nav" data-v="home"><img class="brand-mark" src="assets/img/icon-192.png" alt=""><span><b>TRABAJA</b><small>PROTOCOLO DE DESPERTAR</small></span></button>' +
+    '<button class="brand" data-act="nav" data-v="home"><img class="brand-mark" src="assets/img/icon-192.png" alt=""><span><b>CAZADOR DE HÁBITOS</b><small>RPG DE HÁBITOS</small></span></button>' +
     '<div class="top-actions"><button class="coin-chip" data-act="nav" data-v="shop" aria-label="Tienda">' + ic('coin', 18) + '<b id="coinCount">0</b></button>' +
     '<button class="icon-btn" data-act="nav" data-v="settings" aria-label="Ajustes">' + ic('gear', 20) + '</button></div>';
   document.getElementById('nav').innerHTML = '<span class="nav-ind" aria-hidden="true"></span>' +
